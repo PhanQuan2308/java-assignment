@@ -74,7 +74,15 @@ public class Main {
             System.out.printf("Customer not found.");
         }
     }
+    private static void addMultipleCustomers(CustomerManage manager) {
+        System.out.print("Enter the number of customers to add: ");
+        int n = Integer.parseInt(sc.nextLine());
 
+        for (int i = 1; i <= n; i++) {
+            System.out.println("Enter details for customer " + i + ":");
+            addCustomer(manager);
+        }
+    }
 
     public static void main(String[] args) {
         CustomerManage customerManage = new CustomerManage();
@@ -86,7 +94,8 @@ public class Main {
             System.out.println("3. Search customer by phone number");
             System.out.println("4. Edit customer information");
             System.out.println("5. Delete customer");
-            System.out.println("6. Exit");
+            System.out.println("6. Add multiple customers");
+            System.out.println("7. Exit");
             System.out.print("Enter your choice: ");
 
             int choice = Integer.parseInt(sc.nextLine());
@@ -108,6 +117,9 @@ public class Main {
                     deleteCustomer(customerManage);
                     break;
                 case 6:
+                    addMultipleCustomers(customerManage);
+                    break;
+                case 7:
                     System.out.println("Exiting the system.");
                     System.exit(0);
                 default:
