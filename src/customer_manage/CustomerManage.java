@@ -3,11 +3,12 @@ package customer_manage;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
 public class CustomerManage {
     private Map<String, Customer> customers = new HashMap<>();
-
+    private ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
     private static final String FILE_NAME = "customers.txt";
 
     public CustomerManage() {
@@ -15,76 +16,106 @@ public class CustomerManage {
     }
 
     public void addCustomer(Customer customer) {
-        if (customer.getName() == null || customer.getName().isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be null or empty.");
-        }
-        if (!isValidEmail(customer.getEmail())) {
-            throw new IllegalArgumentException("Invalid email format.");
-        }
-        if (!isValidPhoneNumber(customer.getPhone())) {
-            throw new IllegalArgumentException("Invalid phone number format. It must be 10 digits.");
-        }
-        if (customers.containsKey(customer.getPhone())) {
-            throw new IllegalArgumentException("Phone number already exists.");
-        } else {
-            customers.put(customer.getPhone(), customer);
-            saveCustomersToFile();
+        rwLock.writeLock().lock();
+        try {
+            if (customer.getName() == null || customer.getName().isEmpty()) {
+                throw new IllegalArgumentException("Name cannot be null or empty.");
+            }
+            if (!isValidEmail(customer.getEmail())) {
+                throw new IllegalArgumentException("Invalid email format.");
+            }
+            if (!isValidPhoneNumber(customer.getPhone())) {
+                throw new IllegalArgumentException("Invalid phone number format. It must be 10 digits.");
+            }
+            if (customers.containsKey(customer.getPhone())) {
+                throw new IllegalArgumentException("Phone number already exists.");
+            } else {
+                customers.put(customer.getPhone(), customer);
+                saveCustomersToFile();
+            }
+        }finally {
+            rwLock.writeLock().unlock();
+
         }
     }
 
     public void showCustomers(){
-        if(customers.isEmpty()){
-            System.out.println("No customers found");
-        }else {
-            customers.values().forEach(System.out::println);
+        rwLock.readLock().lock();
+        try {
+            if(customers.isEmpty()){
+                System.out.println("No customers found");
+            }else {
+                customers.values().forEach(System.out::println);
+            }
+        }finally {
+            rwLock.readLock().unlock();
         }
+
     }
 
     public Customer searchCustomerByPhone(String phone){
-        return customers.get(phone);
+        rwLock.readLock().lock();
+        try {
+            return customers.get(phone);
+        }finally {
+            rwLock.readLock().unlock();
+        }
+
     }
 
     public void deleteCustomer(String phoneNumber) {
-        if (customers.remove(phoneNumber) != null) {
+        rwLock.writeLock().lock();
+        try {
+            if (customers.remove(phoneNumber) != null) {
 
-            saveCustomersToFile();
-            System.out.println("Customer removed.");
-        } else {
-            System.out.println("Customer not found.");
+                saveCustomersToFile();
+                System.out.println("Customer removed.");
+            } else {
+                System.out.println("Customer not found.");
+            }
+        }finally {
+            rwLock.writeLock().unlock();
         }
+
     }
 
     public void editCustomer(String phoneNumber, String newName, String newEmail, String newPhoneNumber){
-        Customer customer = customers.get(phoneNumber);
-        if(customer != null){
-            if(newPhoneNumber != null && !newPhoneNumber.isEmpty() && !newPhoneNumber.equals(phoneNumber)){
-                if(!isValidPhoneNumber(newPhoneNumber)){
-                    throw  new IllegalArgumentException("Phone number cannot contain special characters");
+        rwLock.writeLock().lock();
+        try {
+            Customer customer = customers.get(phoneNumber);
+            if(customer != null){
+                if(newPhoneNumber != null && !newPhoneNumber.isEmpty() && !newPhoneNumber.equals(phoneNumber)){
+                    if(!isValidPhoneNumber(newPhoneNumber)){
+                        throw  new IllegalArgumentException("Phone number cannot contain special characters");
+                    }
+
+                    customers.remove(phoneNumber);
+                    customer.setPhone(newPhoneNumber);
+                    phoneNumber = newPhoneNumber;
                 }
 
-                customers.remove(phoneNumber);
-                customer.setPhone(newPhoneNumber);
-                phoneNumber = newPhoneNumber;
-            }
-
-            if (newName != null && !newName.isEmpty()) {
-                customer.setName(newName);
-            }
-
-            if (newEmail != null && !newEmail.isEmpty()) {
-                if(!isValidEmail(newEmail)){
-                    throw  new IllegalArgumentException("Email cannot contain special characters");
+                if (newName != null && !newName.isEmpty()) {
+                    customer.setName(newName);
                 }
-                customer.setEmail(newEmail);
+
+                if (newEmail != null && !newEmail.isEmpty()) {
+                    if(!isValidEmail(newEmail)){
+                        throw  new IllegalArgumentException("Email cannot contain special characters");
+                    }
+                    customer.setEmail(newEmail);
+                }
+
+                customers.put(phoneNumber, customer);
+
+                saveCustomersToFile();
+
+            }else {
+                System.out.printf("Customer not found");
             }
-
-            customers.put(phoneNumber, customer);
-
-            saveCustomersToFile();
-
-        }else {
-            System.out.printf("Customer not found");
+        }finally {
+            rwLock.writeLock().unlock();
         }
+
     }
 
     private void saveCustomersToFile() {

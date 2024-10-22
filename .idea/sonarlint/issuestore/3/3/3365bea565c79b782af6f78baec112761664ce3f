@@ -1,0 +1,13 @@
+
+G	java:S106%"+Replace this use of System.out by a logger.(Í½Ò8 ƒèÅª2
+G	java:S106'"+Replace this use of System.out by a logger.(†ğµ›8 ƒèÅª2
+L	java:S1063"+Replace this use of System.out by a logger.(ÔâÙ·ÿÿÿÿÿ8¡ƒèÅª2
+G	java:S1065"+Replace this use of System.out by a logger.(ÔËö‚8¡ƒèÅª2
+t
+java:S37769"RRefactor this method to reduce its Cognitive Complexity from 17 to the 15 allowed.(ÕªïÌıÿÿÿÿ8­êøÅª2
+B
+java:S3457V"%String contains no format specifiers.(÷†ÚÛ8£ƒèÅª2
+G	java:S106V"+Replace this use of System.out by a logger.(÷†ÚÛ8£ƒèÅª2
+L	java:S106p"+Replace this use of System.out by a logger.(™½˜Ÿøÿÿÿÿ8¦ƒèÅª2
+n
+java:S5998u"LRefactor this repetition that can lead to a stack overflow for large inputs.(›âûÿÿÿÿ8§ƒèÅª2
