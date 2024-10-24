@@ -119,7 +119,7 @@ public class CustomerManage {
     }
 
     private void saveCustomersToFile() {
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true))) {
             for (Customer customer : customers.values()) {
                 writer.write(customer.getName() + "," + customer.getEmail() + "," + customer.getPhone());
                 writer.newLine();
